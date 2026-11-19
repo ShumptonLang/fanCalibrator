@@ -86,6 +86,49 @@ Notes:
 * Room temperature shifts the result. Calibrate in typical conditions, or
   re-run seasonally. The 2 °C guard band absorbs small swings.
 
+## Windows + FanControl
+
+[FanControl](https://getfancontrol.com) does the day-to-day fan control on
+Windows; fanCalibrator works out the numbers to give it.
+
+Why it isn't a FanControl plugin: plugins can only *provide* sensors and
+controls (`IPlugin2`, `IPluginControlSensor.Set/Reset`). They can't read
+FanControl's other sensors or drive fans it already manages, so they can't
+run a calibration. FanControl's config file format isn't documented either.
+So the flow is:
+
+1. Install `pythonnet` and download LibreHardwareMonitor (FanControl's own
+   hardware library, so it sees the same fans, NVIDIA included). Run as
+   Administrator.
+2. **Close FanControl.** Calibration refuses to start while it's running.
+3. List your sensor and control ids, then copy `config.example.windows.json`
+   and fill them in:
+   ```
+   python -m fancalibrator.cli list-lhm --lhm-dir C:\Tools\LibreHardwareMonitor
+   ```
+4. Calibrate under a combined CPU+GPU load (e.g. Prime95 + a GPU stress
+   test; give it as `load_command`, or start it yourself when prompted):
+   ```
+   python -m fancalibrator.cli calibrate my-config.json -o profile.json
+   ```
+5. Generate the FanControl setup sheet, then enter it in FanControl:
+   ```
+   python -m fancalibrator.cli export-fancontrol profile.json my-config.json -o fancontrol-setup.md
+   ```
+
+The sheet sets up:
+
+| fanCalibrator | FanControl |
+|---|---|
+| CPU / GPU arm | Graph curve on a Time Average of that temp |
+| case arm | a Graph curve per chip + Mix Fan Curve, function **Max** |
+| floor / start duty | Minimum % (Stop % for zero-RPM arms) / Start % |
+| hysteresis, up/down rates | Graph hysteresis, Step up % / Step down % |
+
+A machine-readable `*.plan.json` is written next to it. Once the config file
+format has been checked against a real `userConfig.json`, this is what a
+direct config writer will consume.
+
 ## Tests
 
 ```bash

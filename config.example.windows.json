@@ -1,0 +1,20 @@
+{
+  "backend": "lhm",
+  "lhm_dir": "C:\\Tools\\LibreHardwareMonitor",
+  "fans": {
+    "cpu_fan":    {"control": "/lpc/nct6798d/control/1", "rpm": "/lpc/nct6798d/fan/1", "max_db": 32},
+    "gpu_fan":    {"control": "/gpu-nvidia/0/control/1", "rpm": "/gpu-nvidia/0/fan/1", "max_db": 38},
+    "case_front": {"control": "/lpc/nct6798d/control/2", "rpm": "/lpc/nct6798d/fan/2", "max_db": 30},
+    "case_rear":  {"control": "/lpc/nct6798d/control/3", "rpm": "/lpc/nct6798d/fan/3", "max_db": 30}
+  },
+  "sensors": {
+    "cpu": "/amdcpu/0/temperature/2",
+    "gpu": "/gpu-nvidia/0/temperature/0"
+  },
+  "arms": {
+    "cpu":  {"fans": ["cpu_fan"], "controls": ["cpu"]},
+    "gpu":  {"fans": ["gpu_fan"], "controls": ["gpu"]},
+    "case": {"fans": ["case_front", "case_rear"], "controls": ["cpu", "gpu"]}
+  },
+  "targets": {"cpu": 80, "gpu": 75}
+}

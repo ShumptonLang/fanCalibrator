@@ -147,20 +147,30 @@ def calibrate(
 
 
 class ShellLoad:
-    """Runs a load command (e.g. stress-ng plus a GPU stress tool) in its own
-    process group so the whole group can be stopped afterwards."""
+    """Runs a load command (e.g. stress-ng / Prime95 plus a GPU stress tool) in
+    its own process group so the whole tree can be stopped afterwards."""
 
     def __init__(self, command: str) -> None:
         self.command = command
         self.proc: subprocess.Popen | None = None
 
     def start(self) -> None:
-        self.proc = subprocess.Popen(self.command, shell=True, start_new_session=True)
+        if os.name == "nt":
+            self.proc = subprocess.Popen(
+                self.command, shell=True,
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,  # type: ignore[attr-defined]
+            )
+        else:
+            self.proc = subprocess.Popen(self.command, shell=True, start_new_session=True)
 
     def stop(self) -> None:
-        if self.proc and self.proc.poll() is None:
-            os.killpg(self.proc.pid, signal.SIGTERM)
-            try:
-                self.proc.wait(10)
-            except subprocess.TimeoutExpired:
-                os.killpg(self.proc.pid, signal.SIGKILL)
+        if not self.proc or self.proc.poll() is not None:
+            return
+        if os.name == "nt":
+            subprocess.run(["taskkill", "/T", "/F", "/PID", str(self.proc.pid)], capture_output=True)
+            return
+        os.killpg(self.proc.pid, signal.SIGTERM)
+        try:
+            self.proc.wait(10)
+        except subprocess.TimeoutExpired:
+            os.killpg(self.proc.pid, signal.SIGKILL)
