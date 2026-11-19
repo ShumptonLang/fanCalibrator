@@ -1,0 +1,19 @@
+{
+  "fans": {
+    "cpu_fan":    {"pwm": "/sys/class/hwmon/hwmon4/pwm1", "rpm": "/sys/class/hwmon/hwmon4/fan1_input", "max_db": 32},
+    "gpu_fan":    {"pwm": "/sys/class/hwmon/hwmon6/pwm1", "rpm": "/sys/class/hwmon/hwmon6/fan1_input", "max_db": 38},
+    "case_front": {"pwm": "/sys/class/hwmon/hwmon4/pwm2", "rpm": "/sys/class/hwmon/hwmon4/fan2_input", "max_db": 30},
+    "case_rear":  {"pwm": "/sys/class/hwmon/hwmon4/pwm3", "rpm": "/sys/class/hwmon/hwmon4/fan3_input", "max_db": 30}
+  },
+  "sensors": {
+    "cpu": "/sys/class/hwmon/hwmon2/temp1_input",
+    "gpu": "/sys/class/hwmon/hwmon6/temp2_input"
+  },
+  "arms": {
+    "cpu":  {"fans": ["cpu_fan"], "controls": ["cpu"]},
+    "gpu":  {"fans": ["gpu_fan"], "controls": ["gpu"]},
+    "case": {"fans": ["case_front", "case_rear"], "controls": ["cpu", "gpu"], "allow_stop": false}
+  },
+  "targets": {"cpu": 80, "gpu": 75},
+  "load_command": "stress-ng --cpu 0 & glmark2 --run-forever"
+}

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fancalibrator"
+version = "0.1.0"
+description = "Calibrate CPU, GPU and case fans together for the lowest noise that meets temperature targets"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[project.scripts]
+fancal = "fancalibrator.cli:main"
+
+[tool.setuptools]
+packages = ["fancalibrator"]
